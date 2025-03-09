@@ -1,0 +1,30 @@
+.home-box {
+  padding: 16px 24px;
+  .header-container {
+  
+    .header-box {
+      height: 80px;
+      
+      .left {
+        width: 40%;
+        font-size: 20px;
+        padding-left: 8px;
+        
+      }
+      .right {
+        width: 60%;
+        padding-right: 8px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        .des{
+          font-size: 16px;
+          font-weight: 400;
+        }
+        .num{
+          font-size: 16px;
+        }
+      }
+    }
+  }
+}

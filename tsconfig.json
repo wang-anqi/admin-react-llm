@@ -1,0 +1,18 @@
+{
+  "files": [],
+  "references": [
+    { "path": "./tsconfig.app.json" },
+    { "path": "./tsconfig.node.json" }
+  ],
+  //配置 @
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      // 解决项目中使用@作为路径别名，导致vscode无法跳转文件的问题
+      "@/*": ["src/*"]
+    },
+   
+  },
+}
+
+
