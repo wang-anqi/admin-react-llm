@@ -27,6 +27,7 @@
   margin: 8px 0;
   padding: 8px 16px;
   border-radius: 8px;
+  transition: all 0.3s ease;
 }
 
 .user-message {
@@ -35,6 +36,15 @@
 
 .ai-message {
   background-color: #f6f6f6;
+}
+
+.error-message {
+  background-color: #fff1f0;
+  border: 1px solid #ffccc7;
+}
+
+.error-message .message-content {
+  color: #ff4d4f;
 }
 
 .message-content {
@@ -53,6 +63,7 @@
   border-top: 1px solid #e8e8e8;
   display: flex;
   gap: 8px;
+  background-color: #fff;
 }
 
 .input-container .ant-input-textarea {
@@ -61,4 +72,5 @@
 
 .input-container .ant-btn {
   align-self: flex-end;
+  min-width: 80px;
 }

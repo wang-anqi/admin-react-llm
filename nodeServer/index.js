@@ -15,24 +15,53 @@ const { Ollama } = require('@langchain/community/llms/ollama')
 
 const model = new Ollama({
     baseUrl: 'http://localhost:11434',
-    model: 'deepseek-r1:14b'
+    model: 'deepseek-r1:14b',
+    temperature: 0.7
 })
 
 // WebSocket 路由处理聊天功能
-app.ws('/question', (ws, req) => {
+app.ws('/question', async (ws, req) => {
     console.log('新的WebSocket连接已建立')
     
     ws.on('message', async (msg) => {
         try {
             console.log('收到消息:', msg.toString())
-            const stream = await model.stream(msg.toString())
+            const question = msg.toString()
             
-            for await (const str of stream) {
-                ws.send(JSON.stringify({ data: str, isEnd: false }))
+            // 开始生成回答
+            try {
+                console.log('开始生成回答...')
+                const stream = await model.stream(question)
+                let fullResponse = ''
+                
+                for await (const chunk of stream) {
+                    // 确保chunk是字符串
+                    const chunkStr = chunk.toString()
+                    fullResponse += chunkStr
+                    
+                    // 发送部分响应，确保每个chunk都被发送
+                    console.log('发送chunk:', chunkStr)
+                    ws.send(JSON.stringify({ 
+                        data: chunkStr,
+                        isEnd: false 
+                    }))
+                }
+                
+                // 发送完成标记
+                console.log('回答完成，完整响应:', fullResponse)
+                ws.send(JSON.stringify({ 
+                    data: '',
+                    isEnd: true 
+                }))
+                
+            } catch (modelError) {
+                console.error('模型调用错误:', modelError)
+                ws.send(JSON.stringify({ 
+                    data: '抱歉，AI模型暂时无法响应，请稍后再试。',
+                    isEnd: true,
+                    error: true 
+                }))
             }
-            
-            // 发送结束标记
-            ws.send(JSON.stringify({ data: '', isEnd: true }))
         } catch (error) {
             console.error('处理消息时出错:', error)
             ws.send(JSON.stringify({ 
