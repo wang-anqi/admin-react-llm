@@ -2,11 +2,17 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Input, Button, Card, List, Avatar } from 'antd';
 import './index.css';
 
-const ChatShow = () => {
-  const [messages, setMessages] = useState([]);
-  const [inputValue, setInputValue] = useState('');
-  const messagesEndRef = useRef(null);
-  const ws = useRef(null);
+interface Message {
+  content: string;
+  isUser: boolean;
+  timestamp: string;
+}
+
+const ChatShow: React.FC = () => {
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [inputValue, setInputValue] = useState<string>('');
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const ws = useRef<WebSocket | null>(null);
 
   useEffect(() => {
     // Initialize WebSocket connection
@@ -16,7 +22,7 @@ const ChatShow = () => {
       console.log('WebSocket Connected');
     };
 
-    ws.current.onmessage = (event) => {
+    ws.current.onmessage = (event: MessageEvent) => {
       const response = JSON.parse(event.data);
       if (!response.isEnd) {
         setMessages(prev => {
@@ -68,7 +74,7 @@ const ChatShow = () => {
     setInputValue('');
   };
 
-  const handleKeyPress = (e) => {
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSend();
@@ -82,7 +88,7 @@ const ChatShow = () => {
           <List
             itemLayout="horizontal"
             dataSource={messages}
-            renderItem={(message) => (
+            renderItem={(message: Message) => (
               <List.Item className={`message-item ${message.isUser ? 'user-message' : 'ai-message'}`}>
                 <List.Item.Meta
                   avatar={

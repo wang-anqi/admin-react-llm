@@ -8,12 +8,12 @@ import FromStep from "../views/FormShow/formStep";
 import NavStep from "../views/NavShow/stepShow";
 import HomePage from "../views/HomeShow/homePage";
 import User from "../views/User";
+import ChatShow from "../views/ChatShow";
 
 // createBrowserRouter：history路由
 const router = createBrowserRouter([
   {
     path: "/",
-
     element: <Layout />,
     children: [
       {
@@ -27,6 +27,10 @@ const router = createBrowserRouter([
       {
         path: "user",
         element: <User></User>,
+      },
+      {
+        path: "chat",
+        element: <ChatShow></ChatShow>,
       },
       {
         path: "show/table",
@@ -52,7 +56,6 @@ const router = createBrowserRouter([
   },
   {
     path: "/login",
-
     element: <Login />,
   },
 ]);
