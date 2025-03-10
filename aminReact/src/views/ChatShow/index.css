@@ -24,32 +24,83 @@
 }
 
 .message-item {
+  padding: 12px;
   margin: 8px 0;
-  padding: 8px 16px;
-  border-radius: 8px;
-  transition: all 0.3s ease;
+  border-radius: 4px;
 }
 
 .user-message {
-  background-color: #e6f7ff;
+  background-color: #f5f5f5;
 }
 
 .ai-message {
-  background-color: #f6f6f6;
+  background-color: #e6f7ff;
 }
 
 .error-message {
   background-color: #fff1f0;
   border: 1px solid #ffccc7;
-}
-
-.error-message .message-content {
   color: #ff4d4f;
 }
 
 .message-content {
+  margin: 8px 0;
   white-space: pre-wrap;
   word-break: break-word;
+}
+
+.markdown-content {
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.markdown-content p {
+  margin: 0.5em 0;
+}
+
+.markdown-content code {
+  background-color: #f5f5f5;
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-family: 'Courier New', Courier, monospace;
+}
+
+.markdown-content pre {
+  background-color: #f5f5f5;
+  padding: 12px;
+  border-radius: 4px;
+  overflow-x: auto;
+}
+
+.markdown-content pre code {
+  background-color: transparent;
+  padding: 0;
+}
+
+.markdown-content ul, 
+.markdown-content ol {
+  margin: 0.5em 0;
+  padding-left: 20px;
+}
+
+.markdown-content blockquote {
+  margin: 0.5em 0;
+  padding-left: 1em;
+  border-left: 4px solid #ddd;
+  color: #666;
+}
+
+.markdown-content strong {
+  font-weight: 600;
+}
+
+.markdown-content a {
+  color: #1890ff;
+  text-decoration: none;
+}
+
+.markdown-content a:hover {
+  text-decoration: underline;
 }
 
 .message-timestamp {
@@ -58,15 +109,21 @@
   margin-top: 4px;
 }
 
-.input-container {
-  padding: 16px;
-  border-top: 1px solid #e8e8e8;
-  display: flex;
-  gap: 8px;
-  background-color: #fff;
+.loading-message {
+  opacity: 0.8;
 }
 
-.input-container .ant-input-textarea {
+.ai-message .ant-list-item-meta-description {
+  max-width: 100%;
+}
+
+.input-container {
+  margin-top: 16px;
+  display: flex;
+  gap: 8px;
+}
+
+.input-container .ant-input {
   flex: 1;
 }
 
