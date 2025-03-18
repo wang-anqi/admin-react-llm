@@ -24,7 +24,7 @@ const ChatShow: React.FC = () => {
   const [isConnected, setIsConnected] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState<'connected' | 'disconnected' | 'connecting'>('connecting');
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
   const ws = useRef<WebSocket | null>(null);
   const messageIdCounter = useRef(0);
 
@@ -131,11 +131,20 @@ const ChatShow: React.FC = () => {
   };
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (messagesContainerRef.current) {
+      const { scrollHeight, clientHeight } = messagesContainerRef.current;
+      messagesContainerRef.current.scrollTo({
+        top: scrollHeight - clientHeight,
+        behavior: 'smooth'
+      });
+    }
   };
 
   useEffect(() => {
-    scrollToBottom();
+    if (messages.length > 0) {
+      const timeoutId = setTimeout(scrollToBottom, 50);
+      return () => clearTimeout(timeoutId);
+    }
   }, [messages]);
 
   const handleSend = () => {
@@ -185,7 +194,7 @@ const ChatShow: React.FC = () => {
         } 
         className="chat-card"
       >
-        <div className="messages-container">
+        <div className="messages-container" ref={messagesContainerRef}>
           <List
             itemLayout="horizontal"
             dataSource={messages}
@@ -231,7 +240,6 @@ const ChatShow: React.FC = () => {
               </List.Item>
             )}
           />
-          <div ref={messagesEndRef} />
         </div>
         <div className="input-container">
           <Input.TextArea
