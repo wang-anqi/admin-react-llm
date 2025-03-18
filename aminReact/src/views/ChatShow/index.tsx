@@ -170,6 +170,14 @@ const ChatShow: React.FC = () => {
     }
   };
 
+  const handleCancel = () => {
+    if (ws.current && isSending) {
+      ws.current.send(JSON.stringify({ type: 'cancel' }));
+      setIsSending(false);
+      message.info('已取消当前回答');
+    }
+  };
+
   const handleKeyPress = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -246,18 +254,29 @@ const ChatShow: React.FC = () => {
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder="Type your message here..."
+            placeholder="输入消息..."
             autoSize={{ minRows: 1, maxRows: 4 }}
             disabled={!isConnected || isSending}
           />
-          <Button 
-            type="primary" 
-            onClick={handleSend}
-            loading={isSending}
-            disabled={!isConnected || !inputValue.trim()}
-          >
-            {isSending ? '发送中...' : '发送'}
-          </Button>
+          <div className="button-container">
+            {isSending && (
+              <Button 
+                type="primary" 
+                danger
+                onClick={handleCancel}
+                style={{ marginRight: 8 }}
+              >
+                取消
+              </Button>
+            )}
+            <Button
+              type="primary"
+              onClick={handleSend}
+              disabled={!isConnected || !inputValue.trim() || isSending}
+            >
+              发送
+            </Button>
+          </div>
         </div>
       </Card>
     </div>
