@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Input, Button, Card, List, Avatar, message, Spin } from 'antd';
-import ReactMarkdown from 'react-markdown';
 import { LoadingOutlined } from '@ant-design/icons';
+import CustomBreadcrumb from '../../components/MyBreadcrumb';
 import './index.css';
 
 interface Message {
@@ -15,10 +15,53 @@ interface Message {
 
 // 处理AI响应，移除<think>标签及其内容
 const processAIResponse = (text: string): string => {
-  return text.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+  return text
+    .replace(/<think>[\s\S]*?<\/think>/g, '') // 移除<think>标签及其内容
+    .replace(/<\/think>/g, '') // 移除单独的</think>标签
+    .trim();
 };
 
+// 简单的Markdown转换函数
+const simpleMarkdownToHtml = (text: string): string => {
+  return text
+    // 转义HTML特殊字符
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    // 代码块
+    .replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>')
+    // 行内代码
+    .replace(/`([^`]+)`/g, '<code>$1</code>')
+    // 加粗
+    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+    // 斜体
+    .replace(/\*([^*]+)\*/g, '<em>$1</em>')
+    // 链接
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')
+    // 换行
+    .replace(/\n/g, '<br/>');
+};
+
+const MessageContent = ({ message }: { message: Message }) => (
+  <div className={`message-content ${message.loading ? 'loading-message' : ''}`}>
+    {message.isUser ? (
+      <div className="user-text">{message.content}</div>
+    ) : (
+      <div 
+        className="markdown-content"
+        dangerouslySetInnerHTML={{ 
+          __html: simpleMarkdownToHtml(processAIResponse(message.content))
+        }}
+      />
+    )}
+  </div>
+);
+
 const ChatShow: React.FC = () => {
+  const breadcrumbItems = [
+    { key: "chat", label: "AI助手", path: "/chat" }
+  ];
+
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState<string>('');
   const [isConnected, setIsConnected] = useState(false);
@@ -27,6 +70,7 @@ const ChatShow: React.FC = () => {
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const ws = useRef<WebSocket | null>(null);
   const messageIdCounter = useRef(0);
+  const contentBuffer = useRef<Map<string, string>>(new Map());
 
   useEffect(() => {
     connectWebSocket();
@@ -86,20 +130,24 @@ const ChatShow: React.FC = () => {
           
           if (!response.isEnd) {
             if (newMessages.length === 0 || newMessages[newMessages.length - 1].isUser) {
-              // Add new AI message with loading state
               const messageId = `msg_${++messageIdCounter.current}`;
+              const processedContent = processAIResponse(response.data);
+              contentBuffer.current.set(messageId, processedContent);
+              
               newMessages.push({
-                content: processAIResponse(response.data),
+                content: processedContent,
                 isUser: false,
                 timestamp,
                 loading: true,
                 id: messageId
               });
             } else {
-              // Update existing AI message
               const lastMessage = newMessages[newMessages.length - 1];
-              if (lastMessage) {
-                const processedContent = processAIResponse(lastMessage.content + response.data);
+              if (lastMessage && lastMessage.id) {
+                const currentContent = contentBuffer.current.get(lastMessage.id) || '';
+                const processedContent = processAIResponse(currentContent + response.data);
+                contentBuffer.current.set(lastMessage.id, processedContent);
+                
                 newMessages[newMessages.length - 1] = {
                   ...lastMessage,
                   content: processedContent,
@@ -108,13 +156,15 @@ const ChatShow: React.FC = () => {
               }
             }
           } else {
-            // Final message, remove loading state
             if (newMessages.length > 0 && !newMessages[newMessages.length - 1].isUser) {
               const lastMessage = newMessages[newMessages.length - 1];
-              newMessages[newMessages.length - 1] = {
-                ...lastMessage,
-                loading: false
-              };
+              if (lastMessage && lastMessage.id) {
+                contentBuffer.current.delete(lastMessage.id);
+                newMessages[newMessages.length - 1] = {
+                  ...lastMessage,
+                  loading: false
+                };
+              }
             }
           }
           return newMessages;
@@ -187,6 +237,7 @@ const ChatShow: React.FC = () => {
 
   return (
     <div className="chat-container">
+      <CustomBreadcrumb items={breadcrumbItems} />
       <Card 
         title={
           <span>
@@ -232,15 +283,7 @@ const ChatShow: React.FC = () => {
                   }
                   description={
                     <div>
-                      <div className={`message-content ${message.loading ? 'loading-message' : ''}`}>
-                        {message.isUser ? (
-                          message.content
-                        ) : (
-                          <div className="markdown-content">
-                            <ReactMarkdown>{message.content}</ReactMarkdown>
-                          </div>
-                        )}
-                      </div>
+                      <MessageContent message={message} />
                       <div className="message-timestamp">{message.timestamp}</div>
                     </div>
                   }
